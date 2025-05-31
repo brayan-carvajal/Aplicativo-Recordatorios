@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicio de Emails</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333333;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="email"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Servicio de Envío de Emails</h1>
+        <form id="emailForm">
+            <div class="form-group">
+                <label for="email">Correo Electrónico:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="emailType">Tipo de Correo:</label>
+                <select id="emailType" name="emailType" required>
+                    <option value="">Seleccione un tipo</option>
+                    <option value="newAccount">Cuenta nueva</option>
+                    <option value="forgotPassword">Olvidé mi Contraseña</option>
+                    <option value="activationCode">Código de Activación</option>
+                    <option value="passwordChanged">Cambio de Contraseña</option>
+                    <option value="lowStock">Stock bajo</option>
+                    <option value="purchaseConfirmation">Confirmación de Compra</option>
+                </select>
+            </div>
+            <button type="submit">Enviar Correo</button>
+        </form>
+        <div id="message" class="message" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('emailForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const emailType = document.getElementById('emailType').value;
+            const messageDiv = document.getElementById('message');
+            
+            // Validar que se haya seleccionado un tipo de correo
+            if (!emailType) {
+                messageDiv.textContent = 'Por favor seleccione un tipo de correo';
+                messageDiv.className = 'message error';
+                messageDiv.style.display = 'block';
+                return;
+            }
+
+            // Mostrar estado de carga
+            messageDiv.textContent = 'Enviando correo...';
+            messageDiv.className = 'message';
+            messageDiv.style.display = 'block';
+            
+            // Llamar a la API según el tipo de correo seleccionado
+            // Obtener la URL base del servidor actual
+            const baseUrl = window.location.origin;
+            
+            fetch(`http://localhost:8080/api/email/${emailType}/${email}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al enviar el correo');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    messageDiv.textContent = 'Correo enviado exitosamente';
+                    messageDiv.className = 'message success';
+                    messageDiv.style.display = 'block';
+                    console.log('Respuesta del servidor:', data);
+                })
+                .catch(error => {
+                    messageDiv.textContent = error.message + '. Verifica tu configuración de correo.';
+                    messageDiv.className = 'message error';
+                    messageDiv.style.display = 'block';
+                    console.error('Error:', error);
+                });
+        });
+    </script>
+</body>
+</html>
