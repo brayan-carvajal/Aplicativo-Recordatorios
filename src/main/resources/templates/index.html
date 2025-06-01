@@ -3,140 +3,776 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Servicio de Emails</title>
+    <title>Sistema de Recordatorios de Medicamentos</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #333333;
-            text-align: center;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="email"], select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        button {
-            background-color: #007BFF;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .message {
-            padding: 10px;
-            margin-top: 20px;
-            border-radius: 5px;
-            text-align: center;
-        }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background: #f8f9fa; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #dee2e6; }
+        .tab { padding: 15px 25px; cursor: pointer; border: none; background: none; font-size: 16px; color: #6c757d; }
+        .tab.active { color: #007bff; border-bottom: 3px solid #007bff; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .container { background: white; padding: 25px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #495057; }
+        input, select, button { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 14px; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #1e7e34; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        .btn-warning:hover { background: #e0a800; }
+        .btn-small { width: auto; padding: 8px 15px; margin: 3px; font-size: 12px; }
+        .message { padding: 15px; margin: 15px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border: 1px solid #dee2e6; text-align: left; }
+        th { background: #f8f9fa; font-weight: bold; }
+        .no-data { text-align: center; padding: 30px; color: #6c757d; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: linear-gradient(135deg, #007bff, #0056b3); color: white; padding: 20px; border-radius: 8px; text-align: center; }
+        .stat-number { font-size: 2em; font-weight: bold; margin-bottom: 5px; }
+        .stat-label { font-size: 0.9em; opacity: 0.9; }
+        .status-active { color: #28a745; font-weight: bold; }
+        .status-inactive { color: #dc3545; font-weight: bold; }
+        .status-expired { color: #6c757d; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Servicio de Envío de Emails</h1>
-        <form id="emailForm">
-            <div class="form-group">
-                <label for="email">Correo Electrónico:</label>
-                <input type="email" id="email" name="email" required>
+    <div class="header">
+        <h1>💊 Sistema de Recordatorios de Medicamentos</h1>
+        <p>Gestiona pacientes, medicamentos y recordatorios de forma sencilla</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" onclick="showTab('patients')">👥 Pacientes</button>
+        <button class="tab" onclick="showTab('medications')">💊 Medicamentos</button>
+        <button class="tab" onclick="showTab('reminders')">🔔 Recordatorios</button>
+        <button class="tab" onclick="showTab('history')">📋 Historial</button>
+    </div>
+
+    <!-- TAB PACIENTES -->
+    <div id="patients" class="tab-content active">
+        <div class="container">
+            <h2>Gestión de Pacientes</h2>
+            <form id="patientForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="patientName">Nombre del Paciente:</label>
+                        <input type="text" id="patientName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="patientEmail">Correo Electrónico:</label>
+                        <input type="email" id="patientEmail" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-success">➕ Agregar Paciente</button>
+            </form>
+            <div id="patientMessage" style="display: none;"></div>
+        </div>
+
+        <div class="container">
+            <h3>Lista de Pacientes</h3>
+            <button onclick="loadPatients()" class="btn-small">🔄 Actualizar</button>
+            <table id="patientsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Fecha de Registro</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div id="patientsNoData" class="no-data" style="display: none;">No hay pacientes registrados</div>
+        </div>
+    </div>
+
+    <!-- TAB MEDICAMENTOS -->
+    <div id="medications" class="tab-content">
+        <div class="container">
+            <h2>Gestión de Medicamentos</h2>
+            <form id="medicationForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="medicationName">Nombre del Medicamento:</label>
+                        <input type="text" id="medicationName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="medicationDosage">Dosis:</label>
+                        <input type="text" id="medicationDosage" placeholder="ej: 500mg, 1 tableta, etc." required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-success">➕ Agregar Medicamento</button>
+            </form>
+            <div id="medicationMessage" style="display: none;"></div>
+        </div>
+
+        <div class="container">
+            <h3>Lista de Medicamentos</h3>
+            <button onclick="loadMedications()" class="btn-small">🔄 Actualizar</button>
+            <table id="medicationsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Dosis</th>
+                        <th>Fecha de Registro</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div id="medicationsNoData" class="no-data" style="display: none;">No hay medicamentos registrados</div>
+        </div>
+    </div>
+
+    <!-- TAB RECORDATORIOS -->
+    <div id="reminders" class="tab-content">
+        <div class="container">
+            <h2>Crear Recordatorio de Medicamento</h2>
+            <form id="reminderForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="patientSelect">Seleccionar Paciente:</label>
+                        <select id="patientSelect" required>
+                            <option value="">-- Seleccionar Paciente --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="medicationSelect">Seleccionar Medicamento:</label>
+                        <select id="medicationSelect" required>
+                            <option value="">-- Seleccionar Medicamento --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="startDate">Fecha y hora de inicio:</label>
+                        <input type="datetime-local" id="startDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">Fecha y hora de fin:</label>
+                        <input type="datetime-local" id="endDate" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="intervalMinutes">Intervalo en minutos:</label>
+                        <input type="number" id="intervalMinutes" min="1" max="1440" value="480" required>
+                        <small>Sugerencia: 480 min = 8 horas, 720 min = 12 horas, 1440 min = 24 horas</small>
+                    </div>
+                </div>
+                <button type="submit">🔔 Activar Recordatorio</button>
+            </form>
+            <div id="reminderMessage" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- TAB HISTORIAL -->
+    <div id="history" class="tab-content">
+        <div class="container">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="activeRemindersCount">0</div>
+                    <div class="stat-label">Recordatorios Activos</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #28a745, #1e7e34);">
+                    <div class="stat-number" id="patientsCount">0</div>
+                    <div class="stat-label">Pacientes Registrados</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #ffc107, #e0a800);">
+                    <div class="stat-number" id="medicationsCount">0</div>
+                    <div class="stat-label">Medicamentos Registrados</div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="emailType">Tipo de Correo:</label>
-                <select id="emailType" name="emailType" required>
-                    <option value="">Seleccione un tipo</option>
-                    <option value="newAccount">Cuenta nueva</option>
-                    <option value="forgotPassword">Olvidé mi Contraseña</option>
-                    <option value="activationCode">Código de Activación</option>
-                    <option value="passwordChanged">Cambio de Contraseña</option>
-                    <option value="lowStock">Stock bajo</option>
-                    <option value="purchaseConfirmation">Confirmación de Compra</option>
-                </select>
+        </div>
+
+        <div class="container">
+            <h2>Historial de Recordatorios Activos</h2>
+            <div style="margin-bottom: 15px;">
+                <button onclick="loadHistory()" class="btn-small">🔄 Actualizar</button>
+                <button onclick="disableAll()" class="btn-small btn-danger">🚫 Desactivar Todos</button>
+                <button onclick="enableAll()" class="btn-small btn-success">✅ Activar Todos</button>
             </div>
-            <button type="submit">Enviar Correo</button>
-        </form>
-        <div id="message" class="message" style="display: none;"></div>
+            
+            <table id="historyTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Medicamento</th>
+                        <th>Dosis</th>
+                        <th>Inicio</th>
+                        <th>Fin</th>
+                        <th>Intervalo (min)</th>
+                        <th>Próximo Envío</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div id="historyNoData" class="no-data" style="display: none;">No hay recordatorios activos</div>
+        </div>
     </div>
 
     <script>
-        document.getElementById('emailForm').addEventListener('submit', function(e) {
+        // Variables globales
+        let patients = [];
+        let medications = [];
+        let editingPatientId = null;
+        let editingMedicationId = null;
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar fechas por defecto
+            const now = new Date();
+            const startInput = document.getElementById('startDate');
+            const endInput = document.getElementById('endDate');
+            
+            startInput.value = now.toISOString().slice(0, 16);
+            const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+            endInput.value = nextWeek.toISOString().slice(0, 16);
+            
+            // Cargar datos iniciales
+            loadPatients();
+            loadMedications();
+            loadHistory();
+            
+            // Manejar mensajes URL
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('message') === 'unsubscribed') {
+                showMessage('Recordatorio desactivado desde el email', 'success', 'reminderMessage');
+            } else if (urlParams.get('error')) {
+                showMessage('Error: ' + urlParams.get('error'), 'error', 'reminderMessage');
+            }
+        });
+
+        // Gestión de Tabs
+        function showTab(tabName) {
+            // Ocultar todos los tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            const tabButtons = document.querySelectorAll('.tab');
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Mostrar tab seleccionado
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Recargar datos si es necesario
+            if (tabName === 'reminders') {
+                loadPatientsAndMedications();
+            } else if (tabName === 'history') {
+                loadHistory();
+                updateStats();
+            }
+        }
+
+        // PACIENTES
+        document.getElementById('patientForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const email = document.getElementById('email').value;
-            const emailType = document.getElementById('emailType').value;
-            const messageDiv = document.getElementById('message');
+            const name = document.getElementById('patientName').value;
+            const email = document.getElementById('patientEmail').value;
             
-            // Validar que se haya seleccionado un tipo de correo
-            if (!emailType) {
-                messageDiv.textContent = 'Por favor seleccione un tipo de correo';
-                messageDiv.className = 'message error';
-                messageDiv.style.display = 'block';
-                return;
+            if (editingPatientId) {
+                updatePatient(editingPatientId, name, email);
+            } else {
+                createPatient(name, email);
             }
+        });
 
-            // Mostrar estado de carga
-            messageDiv.textContent = 'Enviando correo...';
-            messageDiv.className = 'message';
-            messageDiv.style.display = 'block';
+        function createPatient(name, email) {
+            const data = { name, email };
             
-            // Llamar a la API según el tipo de correo seleccionado
-            // Obtener la URL base del servidor actual
-            const baseUrl = window.location.origin;
+            showMessage('Creando paciente...', 'info', 'patientMessage');
             
-            fetch(`http://localhost:8080/api/email/${emailType}/${email}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error al enviar el correo');
-                    }
-                    return response.text();
-                })
+            fetch('/api/patients', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.text())
+            .then(data => {
+                if (data.includes('exitosamente')) {
+                    showMessage(data, 'success', 'patientMessage');
+                    document.getElementById('patientForm').reset();
+                    loadPatients();
+                } else {
+                    showMessage(data, 'error', 'patientMessage');
+                }
+            })
+            .catch(error => {
+                showMessage('Error: ' + error.message, 'error', 'patientMessage');
+            });
+        }
+
+        function loadPatients() {
+            fetch('/api/patients')
+                .then(response => response.json())
                 .then(data => {
-                    messageDiv.textContent = 'Correo enviado exitosamente';
-                    messageDiv.className = 'message success';
-                    messageDiv.style.display = 'block';
-                    console.log('Respuesta del servidor:', data);
+                    patients = data;
+                    displayPatients(data);
+                    updatePatientSelect();
+                    updateStats();
                 })
                 .catch(error => {
-                    messageDiv.textContent = error.message + '. Verifica tu configuración de correo.';
-                    messageDiv.className = 'message error';
-                    messageDiv.style.display = 'block';
-                    console.error('Error:', error);
+                    showMessage('Error cargando pacientes: ' + error.message, 'error', 'patientMessage');
                 });
+        }
+
+        function displayPatients(data) {
+            const table = document.getElementById('patientsTable');
+            const noData = document.getElementById('patientsNoData');
+            const tbody = table.querySelector('tbody');
+            
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                table.style.display = 'none';
+                noData.style.display = 'block';
+            } else {
+                table.style.display = 'table';
+                noData.style.display = 'none';
+                
+                data.forEach(patient => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${patient.name}</td>
+                        <td>${patient.email}</td>
+                        <td>${formatDate(patient.createdAt)}</td>
+                        <td>
+                            <button onclick="editPatient('${patient.id}')" class="btn-small btn-warning">✏️ Editar</button>
+                            <button onclick="deletePatient('${patient.id}')" class="btn-small btn-danger">🗑️ Eliminar</button>
+                        </td>
+                    `;
+                });
+            }
+        }
+
+        function editPatient(id) {
+            const patient = patients.find(p => p.id === id);
+            if (patient) {
+                document.getElementById('patientName').value = patient.name;
+                document.getElementById('patientEmail').value = patient.email;
+                editingPatientId = id;
+                document.querySelector('#patientForm button').textContent = '💾 Actualizar Paciente';
+            }
+        }
+
+        function updatePatient(id, name, email) {
+            const data = { name, email };
+            
+            fetch(`/api/patients/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.text())
+            .then(data => {
+                showMessage(data, data.includes('exitosamente') ? 'success' : 'error', 'patientMessage');
+                if (data.includes('exitosamente')) {
+                    document.getElementById('patientForm').reset();
+                    editingPatientId = null;
+                    document.querySelector('#patientForm button').textContent = '➕ Agregar Paciente';
+                    loadPatients();
+                }
+            })
+            .catch(error => {
+                showMessage('Error: ' + error.message, 'error', 'patientMessage');
+            });
+        }
+
+        function deletePatient(id) {
+            if (!confirm('¿Eliminar este paciente?')) return;
+            
+            fetch(`/api/patients/${id}`, { method: 'DELETE' })
+                .then(response => response.text())
+                .then(data => {
+                    showMessage(data, data.includes('exitosamente') ? 'success' : 'error', 'patientMessage');
+                    loadPatients();
+                })
+                .catch(error => {
+                    showMessage('Error: ' + error.message, 'error', 'patientMessage');
+                });
+        }
+
+        // MEDICAMENTOS
+        document.getElementById('medicationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('medicationName').value;
+            const dosage = document.getElementById('medicationDosage').value;
+            
+            if (editingMedicationId) {
+                updateMedication(editingMedicationId, name, dosage);
+            } else {
+                createMedication(name, dosage);
+            }
         });
+
+        function createMedication(name, dosage) {
+            const data = { name, dosage };
+            
+            showMessage('Creando medicamento...', 'info', 'medicationMessage');
+            
+            fetch('/api/medications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.text())
+            .then(data => {
+                if (data.includes('exitosamente')) {
+                    showMessage(data, 'success', 'medicationMessage');
+                    document.getElementById('medicationForm').reset();
+                    loadMedications();
+                } else {
+                    showMessage(data, 'error', 'medicationMessage');
+                }
+            })
+            .catch(error => {
+                showMessage('Error: ' + error.message, 'error', 'medicationMessage');
+            });
+        }
+
+        function loadMedications() {
+            fetch('/api/medications')
+                .then(response => response.json())
+                .then(data => {
+                    medications = data;
+                    displayMedications(data);
+                    updateMedicationSelect();
+                    updateStats();
+                })
+                .catch(error => {
+                    showMessage('Error cargando medicamentos: ' + error.message, 'error', 'medicationMessage');
+                });
+        }
+
+        function displayMedications(data) {
+            const table = document.getElementById('medicationsTable');
+            const noData = document.getElementById('medicationsNoData');
+            const tbody = table.querySelector('tbody');
+            
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                table.style.display = 'none';
+                noData.style.display = 'block';
+            } else {
+                table.style.display = 'table';
+                noData.style.display = 'none';
+                
+                data.forEach(medication => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${medication.name}</td>
+                        <td>${medication.dosage}</td>
+                        <td>${formatDate(medication.createdAt)}</td>
+                        <td>
+                            <button onclick="editMedication('${medication.id}')" class="btn-small btn-warning">✏️ Editar</button>
+                            <button onclick="deleteMedication('${medication.id}')" class="btn-small btn-danger">🗑️ Eliminar</button>
+                        </td>
+                    `;
+                });
+            }
+        }
+
+        function editMedication(id) {
+            const medication = medications.find(m => m.id === id);
+            if (medication) {
+                document.getElementById('medicationName').value = medication.name;
+                document.getElementById('medicationDosage').value = medication.dosage;
+                editingMedicationId = id;
+                document.querySelector('#medicationForm button').textContent = '💾 Actualizar Medicamento';
+            }
+        }
+
+        function updateMedication(id, name, dosage) {
+            const data = { name, dosage };
+            
+            fetch(`/api/medications/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.text())
+            .then(data => {
+                showMessage(data, data.includes('exitosamente') ? 'success' : 'error', 'medicationMessage');
+                if (data.includes('exitosamente')) {
+                    document.getElementById('medicationForm').reset();
+                    editingMedicationId = null;
+                    document.querySelector('#medicationForm button').textContent = '➕ Agregar Medicamento';
+                    loadMedications();
+                }
+            })
+            .catch(error => {
+                showMessage('Error: ' + error.message, 'error', 'medicationMessage');
+            });
+        }
+
+        function deleteMedication(id) {
+            if (!confirm('¿Eliminar este medicamento?')) return;
+            
+            fetch(`/api/medications/${id}`, { method: 'DELETE' })
+                .then(response => response.text())
+                .then(data => {
+                    showMessage(data, data.includes('exitosamente') ? 'success' : 'error', 'medicationMessage');
+                    loadMedications();
+                })
+                .catch(error => {
+                    showMessage('Error: ' + error.message, 'error', 'medicationMessage');
+                });
+        }
+
+        // RECORDATORIOS
+        function loadPatientsAndMedications() {
+            loadPatients();
+            loadMedications();
+        }
+
+        function updatePatientSelect() {
+            const select = document.getElementById('patientSelect');
+            select.innerHTML = '<option value="">-- Seleccionar Paciente --</option>';
+            
+            patients.forEach(patient => {
+                const option = document.createElement('option');
+                option.value = patient.id;
+                option.textContent = `${patient.name} (${patient.email})`;
+                select.appendChild(option);
+            });
+        }
+
+        function updateMedicationSelect() {
+            const select = document.getElementById('medicationSelect');
+            select.innerHTML = '<option value="">-- Seleccionar Medicamento --</option>';
+            
+            medications.forEach(medication => {
+                const option = document.createElement('option');
+                option.value = medication.id;
+                option.textContent = `${medication.name} - ${medication.dosage}`;
+                select.appendChild(option);
+            });
+        }
+
+        document.getElementById('reminderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const data = {
+                patientId: document.getElementById('patientSelect').value,
+                medicationId: document.getElementById('medicationSelect').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                intervalMinutes: parseInt(document.getElementById('intervalMinutes').value)
+            };
+            
+            showMessage('Creando recordatorio...', 'info', 'reminderMessage');
+            
+            fetch('/api/reminder/activate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.text())
+            .then(data => {
+                if (data.includes('exitosamente')) {
+                    showMessage(data, 'success', 'reminderMessage');
+                    document.getElementById('reminderForm').reset();
+                    // Resetear fechas
+                    const now = new Date();
+                    document.getElementById('startDate').value = now.toISOString().slice(0, 16);
+                    const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+                    document.getElementById('endDate').value = nextWeek.toISOString().slice(0, 16);
+                    document.getElementById('intervalMinutes').value = '480';
+                } else {
+                    showMessage(data, 'error', 'reminderMessage');
+                }
+            })
+            .catch(error => {
+                showMessage('Error: ' + error.message, 'error', 'reminderMessage');
+            });
+        });
+
+        // HISTORIAL
+        function loadHistory() {
+            fetch('/api/reminder/history')
+                .then(response => response.json())
+                .then(data => {
+                    displayHistory(data);
+                    updateStats();
+                })
+                .catch(error => {
+                    console.error('Error cargando historial:', error);
+                    showMessage('Error cargando historial: ' + error.message, 'error', 'reminderMessage');
+                });
+        }
+
+        function displayHistory(data) {
+            const table = document.getElementById('historyTable');
+            const noData = document.getElementById('historyNoData');
+            const tbody = table.querySelector('tbody');
+            
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                table.style.display = 'none';
+                noData.style.display = 'block';
+            } else {
+                table.style.display = 'table';
+                noData.style.display = 'none';
+                
+                data.forEach(reminder => {
+                    const row = tbody.insertRow();
+                    const status = getStatusText(reminder.isActive, reminder.endDate);
+                    
+                    row.innerHTML = `
+                        <td>${reminder.patientName}</td>
+                        <td>${reminder.medicationName}</td>
+                        <td>${reminder.medicationDosage}</td>
+                        <td>${formatDate(reminder.startDate)}</td>
+                        <td>${formatDate(reminder.endDate)}</td>
+                        <td>${reminder.intervalMinutes}</td>
+                        <td>${reminder.nextSend ? formatDate(reminder.nextSend) : 'N/A'}</td>
+                        <td><span class="${status.class}">${status.text}</span></td>
+                        <td>
+                            ${reminder.isActive ? 
+                                `<button onclick="toggleReminder('${reminder.id}', false)" class="btn-small btn-danger">❌ Desactivar</button>` :
+                                `<button onclick="toggleReminder('${reminder.id}', true)" class="btn-small btn-success">✅ Activar</button>`
+                            }
+                            <button onclick="deleteReminder('${reminder.id}')" class="btn-small btn-danger">🗑️ Eliminar</button>
+                        </td>
+                    `;
+                });
+            }
+        }
+
+        function getStatusText(isActive, endDate) {
+            const now = new Date();
+            const end = new Date(endDate);
+            
+            if (end < now) {
+                return { text: 'Expirado', class: 'status-expired' };
+            } else if (isActive) {
+                return { text: 'Activo', class: 'status-active' };
+            } else {
+                return { text: 'Inactivo', class: 'status-inactive' };
+            }
+        }
+
+        function toggleReminder(id, activate) {
+            const action = activate ? 'activar' : 'desactivar';
+            
+            fetch(`/api/reminder/${id}/${activate ? 'activate' : 'deactivate'}`, {
+                method: 'POST'
+            })
+            .then(response => response.text())
+            .then(data => {
+                showMessage(data, data.includes('exitosamente') ? 'success' : 'error', 'reminderMessage');
+                loadHistory();
+            })
+            .catch(error => {
+                showMessage('Error al ' + action + ' recordatorio: ' + error.message, 'error', 'reminderMessage');
+            });
+        }
+
+        function deleteReminder(id) {
+            if (!confirm('¿Eliminar este recordatorio?')) return;
+            
+            fetch(`/api/reminder/${id}`, { method: 'DELETE' })
+                .then(response => response.text())
+                .then(data => {
+                    showMessage(data, data.includes('exitosamente') ? 'success' : 'error', 'reminderMessage');
+                    loadHistory();
+                })
+                .catch(error => {
+                    showMessage('Error al eliminar recordatorio: ' + error.message, 'error', 'reminderMessage');
+                });
+        }
+
+        function disableAll() {
+            if (!confirm('¿Desactivar todos los recordatorios activos?')) return;
+            
+            fetch('/api/reminder/disable-all', { method: 'POST' })
+                .then(response => response.text())
+                .then(data => {
+                    showMessage(data, data.includes('exitosamente') ? 'success' : 'error', 'reminderMessage');
+                    loadHistory();
+                })
+                .catch(error => {
+                    showMessage('Error al desactivar recordatorios: ' + error.message, 'error', 'reminderMessage');
+                });
+        }
+
+        function enableAll() {
+            if (!confirm('¿Activar todos los recordatorios?')) return;
+            
+            fetch('/api/reminder/enable-all', { method: 'POST' })
+                .then(response => response.text())
+                .then(data => {
+                    showMessage(data, data.includes('exitosamente') ? 'success' : 'error', 'reminderMessage');
+                    loadHistory();
+                })
+                .catch(error => {
+                    showMessage('Error al activar recordatorios: ' + error.message, 'error', 'reminderMessage');
+                });
+        }
+
+        // UTILIDADES
+        function showMessage(message, type, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="message ${type}">${message}</div>`;
+            container.style.display = 'block';
+            
+            // Auto-ocultar después de 5 segundos si es éxito
+            if (type === 'success') {
+                setTimeout(() => {
+                    container.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function updateStats() {
+            // Contar recordatorios activos
+            fetch('/api/reminder/history')
+                .then(response => response.json())
+                .then(data => {
+                    const activeCount = data.filter(r => r.isActive && new Date(r.endDate) > new Date()).length;
+                    document.getElementById('activeRemindersCount').textContent = activeCount;
+                })
+                .catch(error => {
+                    document.getElementById('activeRemindersCount').textContent = '0';
+                });
+            
+            // Actualizar contadores de pacientes y medicamentos
+            document.getElementById('patientsCount').textContent = patients.length;
+            document.getElementById('medicationsCount').textContent = medications.length;
+        }
+
+        // Auto-actualización cada 30 segundos en la pestaña de historial
+        setInterval(() => {
+            const activeTab = document.querySelector('.tab-content.active');
+            if (activeTab && activeTab.id === 'history') {
+                loadHistory();
+            }
+        }, 30000);
+
     </script>
 </body>
 </html>
